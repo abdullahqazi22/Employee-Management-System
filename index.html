@@ -16,8 +16,11 @@
       <input type="text" id="empDept" placeholder="Department">
       <input type="text" id="empHireDate" placeholder="YY-MM-DD">
       <button onclick="addEmployee()">Add Employee</button>
+      <button onclick="getEmployees()">Get Employee</button>
+      <button><a href="deleteEmployee.html">Delete Employee</a></button>
+      <button onclick="updateEmployee()"><a href="updateEmployee.html">Edit Employee Info</a></button>
 
-      <table id="employeeTable">
+      <table border="1" style="width:100%">
          <thead>
             <tr>
             <th>ID</th>
@@ -27,15 +30,7 @@
             <th>Actions</th>
             </tr>
          </thead>
-         <tbody>
-            <tr>
-               <td>1</td>
-               <td>John Doe</td>
-               <td>Engineering</td>
-               <td>2025-01-15</td>
-               <td><button>View Salaries</button></td>
-            </tr>
-         </tbody>
+         <tbody id="employeeTable"></tbody>
       </table>
     </div>
     <div class="card">
@@ -43,9 +38,12 @@
       <input type="text" id="salaryMonth" placeholder="Month-Year">
       <input type="number" id="salaryAmount" placeholder="Amount">
       <input type="number" id="employeeId" placeholder="Employee ID">
+      <button onclick="getSalary()">Get Employee's Salary</button>
       <button onclick="addSalary()">Add Salary</button>
+      <button><a href="./updateSalary.html">Edit Employee's Salary</a></button>
+      <button><a href="./deleteSalary.html">Delete Employee's Salary</a></button>
 
-      <table id="salaryTable">
+      <table border="1" style="width:100%">
          <thead>
             <tr>
             <th>ID</th>
@@ -55,15 +53,7 @@
             <th>Actions</th>
             </tr>
          </thead>
-         <tbody>
-            <tr>
-               <td>1</td>
-               <td>Jan-2025</td>
-               <td>40000</td>
-               <td><button>Edit</button></td>
-               <td><button>Delete</button></td>
-            </tr>
-         </tbody>
+         <tbody id="salaryTable"></tbody>
       </table>
     </div>
  </body>
@@ -71,6 +61,68 @@
  </html>
 
  <script>
+
+ async function getSalary(){
+    try {
+        const response = await fetch(`https://localhost:7125/salaries`);
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch Employee's Salaries");
+        }
+
+        const Salaries = await response.json();
+        console.log(Salaries)
+        const salaryTable = document.getElementById("salaryTable");
+        salaryTable.innerHTML = "";
+
+        Salaries.forEach(e => {
+            const rowData = document.createElement("tr");
+            rowData.innerHTML = `
+                <td>${e.employeeId}</td>
+                <td>${e.amount}</td>
+                <td>${new Date(e.monthYear).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</td>
+            `;
+
+            salaryTable.appendChild(rowData);
+        });
+
+    }
+    catch(error) {
+        console.error("Error loading Employee's Salary: ", error);
+    }
+}
+async function getEmployees() {
+    try {
+        const endpoint = "https://localhost:7125/employees";
+        const response = await fetch(endpoint);
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch Employees");
+        }
+
+        const employees = await response.json();
+        const employeetable = document.getElementById("employeeTable");
+        employeetable.innerHTML = "";
+
+        employees.forEach(e => {
+            const rowData = document.createElement("tr");
+            rowData.innerHTML = `
+                <td>${e.employeeId}</td>
+                <td>${e.fullName}</td>
+                <td>${e.department}</td>
+                <td>${new Date(e.hireDate).toISOString().split("T")[0]}</td>
+            `;
+            employeetable.appendChild(rowData);
+        });
+
+    } catch (error) {
+        console.error("Error loading Employees: ", error);
+    }
+}
+
+
+ 
+
 async function addEmployee(){
 const name = document.getElementById("empName").value
 const dept= document.getElementById("empDept").value
@@ -99,6 +151,7 @@ if (response.ok){
     const data= await response.json();
     console.log("Employee Added: ", data);
     alert("Employee Added Successfully");
+    await getEmployees();
 }
 else {
     const err= await response.text();
@@ -114,20 +167,20 @@ alert("Could not connect to server")
 async function addSalary(){
  const salaryMonth = document.getElementById("salaryMonth").value
  const salaryAmount = document.getElementById("salaryAmount").value
- const employeeID = document.getElementById("employeeId").value
+ const employeeId = document.getElementById("employeeId").value
 
- if (!salaryAmount || !salaryMonth || !employeeID){
+ if (!salaryAmount || !salaryMonth || !employeeId){
    alert("Please fill all the fields")
  }
 
  const employeeSalary={
-   salaryAmount:salaryAmount,
-   salaryMonth: salaryMonth,
-   employeeID:employeeID
+   amount:salaryAmount,
+   monthYear: salaryMonth,
+   employeeId:employeeId
  }
 
  try {
-   const response= await fetch(`https://localhost:7125/salaries/${employeeID}`, {
+   const response= await fetch(`https://localhost:7125/salaries/${employeeId}`, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(employeeSalary)
@@ -149,5 +202,6 @@ async function addSalary(){
       alert("Could not connect to server")
    }
 }
+
 
 </script>

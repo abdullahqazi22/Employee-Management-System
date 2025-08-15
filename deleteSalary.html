@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Employee's Salary</title>
+</head>
+<body>
+    <div class="card">
+        <h2>Delete Employee's Salary</h2>
+        <input type="number" id="employeeId" placeholder="Employee ID">
+        <button onclick="deleteSalary()">Delete Employee's Salary</button>
+    </div>
+</body>
+</html>
+
+<Script>
+    async function deleteSalary(){
+const employeeid= document.getElementById("employeeId").value;
+
+if (!employeeid){
+alert("Please give the required employee Id");
+return;
+}
+try {
+const response= await fetch(`https://localhost:7125/employees/${employeeid}`,{
+    method:"DELETE"
+})
+if (response.ok) {
+            alert(`Employee's Salary with ID ${employeeid} deleted successfully.`);
+        } else {
+            const errorMsg = await response.text();
+            alert("Failed to delete employee's salary: " + errorMsg);
+        }
+    } catch (error) {
+        console.error("Error deleting employee's salary:", error);
+        alert("An error occurred while deleting employee's salary.");
+    }
+
+}
+
+</Script>

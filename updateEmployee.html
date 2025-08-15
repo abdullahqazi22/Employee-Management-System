@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Info Update</title>
+</head>
+<body>
+    <div class="card">
+        <h2>Update Employee</h2>
+        <input type="text" id="empName" placeholder="Full Name">
+        <input type="text" id="empDept" placeholder="Department">
+        <input type="text" id="empHireDate" placeholder="YY-MM-DD">
+        <input type="number" id="employeeId" placeholder="Employee ID">
+        <button onclick="updateEmployee()"> Update Employee Salary</button>
+    </div>
+</body>
+</html>
+<script>
+
+async function updateEmployee(){
+const name = document.getElementById("empName").value
+const dept= document.getElementById("empDept").value
+const hireDate= document.getElementById("empHireDate").value
+const employeeId= document.getElementById("employeeId").value
+
+
+
+   if (!name || !dept || !hireDate || !employeeId){
+      alert("Please fill the fields")
+   }
+
+   const updatedEmployee={
+      employeeId:Number(employeeId),
+      fullName:name,
+      hireDate:hireDate,
+      department: dept
+   }
+
+   try{
+      const response = await fetch(`https://localhost:7125/employees/by-employee/${employeeId}` ,{
+         method:"PUT",
+         headers:{"Content-Type": "application/json"},
+         body:JSON.stringify(updatedEmployee)
+      });
+
+      if(response.ok){
+         const data = await response.json();
+         console.log("Employee's salary updated: ", data)
+         alert("Employee Updated Successfully")
+      }
+      else {
+         const err = await response.text();
+         alert("Error Updating Employee's Info: "+err)
+      }
+   }
+   catch (error){
+      console.error("Fetch error: ",error)
+      alert("Could not connect to server")
+   }
+}
+
+</script>
